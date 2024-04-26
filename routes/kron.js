@@ -15,8 +15,6 @@ function getOptions(api_key) {
 
 router.post('/transactions', function (req, res, next) {
     const { accessKey, account_id } = req.body
-    console.log(accessKey)
-    console.log(account_id)
     fetch(`https://kron.no/api/accounts/${account_id}/transactions`, getOptions(accessKey))
         .then(response => response.json())
         .then(response => res.send(response.filter(res => res.type !== 'DEP').map(res => {
