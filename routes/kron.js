@@ -46,6 +46,7 @@ router.post('/holdings', function (req, res, next) {
                 accountKey: accountKey,
                 equityShare: res.units,
                 equityType: "Fund",
+                equityShare: 1,
                 value: res.market_value,
                 goalPercentage: 0
             }
