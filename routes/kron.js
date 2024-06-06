@@ -58,4 +58,19 @@ router.post('/holdings', function (req, res, next) {
         })
 });
 
+router.post('/development', function (req, res, next) {
+    const { accessKey, account_id, interval } = req.body
+
+    fetch(`https://kron.no/api/v4/accounts/${account_id}/development?interval=${interval}`, getOptions(accessKey))
+        .then(response => response.json())
+        .then(response => res.send(response.data.series.map(res => {
+            return {
+                yield_percentage: res.yield.value,
+                date: res.date,
+                yield_in_currency: res.return.value,
+                market_value: res.market_value.value
+            }
+        })))
+});
+
 module.exports = router;
