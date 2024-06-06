@@ -48,7 +48,8 @@ router.post('/holdings', function (req, res, next) {
                 equityType: "Fund",
                 equityShare: 1,
                 value: res.market_value,
-                goalPercentage: 0
+                goalPercentage: 0,
+                yield: res.profit
             }
         })))
         .catch(error => {
