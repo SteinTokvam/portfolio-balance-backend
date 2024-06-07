@@ -16,7 +16,13 @@ router.post('/history', function (req, res, next) {
         "body": getBody(market, time),
         "method": "POST",
     }).then(result => result.json())
-        .then(result => res.send(result.data.market.priceHistory));
+        .then(result => res.send(result.data.market.priceHistory.data.map(data => {
+            return {
+                date: data.date.split("T")[0],
+                price: parseFloat(data.price)
+            }
+        }
+        )));
 });
 
 module.exports = router;
