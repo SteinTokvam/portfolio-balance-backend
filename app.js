@@ -11,8 +11,8 @@ var usersRouter = require('./routes/users');
 var e24Router = require('./routes/e24');
 var kronRouter = require('./routes/kron');
 var pingRouter = require('./routes/ping');
-var dbRouter = require('./routes/dbtest')
 var firiRouter = require('./routes/firi')
+var newswebRouter = require('./routes/newsweb')
 
 var app = express();
 
@@ -32,8 +32,8 @@ app.use('/users', usersRouter);
 app.use('/e24', e24Router);
 app.use('/kron', kronRouter);
 app.use('/ping', pingRouter);
-app.use('/db', dbRouter);
-app.use('/firi', firiRouter)
+app.use('/firi', firiRouter);
+app.use('/newsweb', newswebRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
