@@ -20,7 +20,7 @@ router.post('/news', function (req, res, next) {
     const { ticker } = req.body
     if (!ticker) {
         return next(createError(400, 'Missing required fields'))
-            .then(data => res.send(data))
+            .then(data => res.send("Feil"))
     }
 
     getIssuer(ticker)
@@ -39,7 +39,7 @@ router.post('/message', function (req, res, next) {
     const { messageId } = req.body
     if (!messageId) {
         return next(createError(400, `Missing required field messageId`))
-            .then(data => res.send(data))
+            .then(data => res.send("Feil"))
     }
     fetch(`https://api3.oslo.oslobors.no/v1/newsreader/message?messageId=${messageId}`,
         {
