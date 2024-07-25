@@ -49,7 +49,8 @@ router.post('/holdings', function (req, res, next) {
                 equityShare: res.units,
                 value: res.market_value,
                 goalPercentage: 0,
-                yield: res.profit
+                yield: res.profit,
+                isin: res.isin,
             }
         })))
         .catch(error => {
