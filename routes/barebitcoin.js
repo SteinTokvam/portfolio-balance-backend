@@ -55,7 +55,7 @@ router.get('/price', function (req, res, next) {
         .then(response => res.send(response))
 });
 
-router.get('/balance', function (req, res, next) {
+router.post('/balance', function (req, res, next) {
     const { accessKey, accountKey } = req.body
     fetch('https://api.bb.no/export/balance', {
         headers: {
@@ -82,7 +82,7 @@ router.get('/balance', function (req, res, next) {
         })
 })
 
-router.get('/transactions', function (req, res, next) {
+router.post('/transactions', function (req, res, next) {
     const { accessKey } = req.body
     fetch('https://api.bb.no/export/transactions', {
         headers: {
