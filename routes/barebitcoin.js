@@ -2,19 +2,61 @@ var express = require('express');
 var createError = require('http-errors');
 var router = express.Router();
 
-router.get('/price', function (req, res, next) {
-    fetch('https://barebitcoin.no/connect/bb.v1alpha.BBService/Price', {
+function setType(type) {
+    switch (type) {
+        case "FIAT_DEPOSIT":
+        case "BTC_DEPOSIT":
+            return "DEPOSIT";
+        case "FIAT_WITHDRAWAL":
+        case "BTC_WITHDRAWAL":
+            return "WITHDRAWAL";
+        case "BTC_BUY":
+            return "BUY";
+        case "BTC_SELL":
+            return "SELL";
+        default:
+            return type;
+    }
+}
+
+function setEquityShare(item) {
+    if (item.type === "BTC_BUY") {
+        return parseFloat(item.inAmount)
+    }
+    else if (item.type === "BTC_SELL") {
+        return parseFloat(item.outAmount)
+    } else if (item.type === "BTC_WITHDRAWAL") {
+        return parseFloat(item.outAmount)
+    } else if (item.type === "BTC_DEPOSIT") {
+        return parseFloat(item.inAmount)
+    }
+}
+
+function setFeeAmount(item) {
+    if (item.type === "BTC_WITHDRAWAL") {
+        return parseFloat(parseFloat(item.feeAmount * item.rateMarket).toFixed(2))
+    }
+    return item.feeAmount !== '' ? parseFloat(item.feeAmount) : 0
+}
+
+function getPrice(onlyPrice) {
+    return fetch('https://barebitcoin.no/connect/bb.v1alpha.BBService/Price', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         }
     })
         .then(response => response.json())
+        .then(response => onlyPrice ? response.buyBtcnok - (response.buyBtcnok - response.sellBtcnok) : response)
+}
+
+router.get('/price', function (req, res, next) {
+    getPrice(false)
         .then(response => res.send(response))
 });
 
 router.get('/balance', function (req, res, next) {
-    const { accessKey, accountKey, account_id } = req.body
+    const { accessKey, accountKey } = req.body
     fetch('https://api.bb.no/export/balance', {
         headers: {
             'Content-Type': 'application/json',
@@ -22,11 +64,26 @@ router.get('/balance', function (req, res, next) {
         }
     })
         .then(response => response.json())
-        .then(response => res.send(response.filter(res => res.name === "Hovedkonto")[0]))
+        .then(response => {
+            getPrice(true)
+                .then(price => {
+                    res.send(response.bitcoinAccounts.filter(res => res.name === "Hovedkonto").map(account => {
+                        return {
+                            name: "BTC",
+                            accountKey: accountKey,
+                            equityShare: parseFloat(account.balanceBitcoin),
+                            equityType: "Cryptocurrency",
+                            value: price * parseFloat(account.balanceBitcoin),
+                            goalPercentage: 0,
+                            yield: 0,
+                        }
+                    }))
+                })
+        })
 })
 
 router.get('/transactions', function (req, res, next) {
-    const { accessKey, accountKey, account_id } = req.body
+    const { accessKey } = req.body
     fetch('https://api.bb.no/export/transactions', {
         headers: {
             'Content-Type': 'application/json',
@@ -35,6 +92,7 @@ router.get('/transactions', function (req, res, next) {
     })
         .then(response => response.json())
         .then(response => {
+            console.log(response)
             const filteredData = response
                 .filter(item => item.inCurrency !== "NOK")
                 .filter(item => item.accountId !== "acc_01J631DK3N56K40P6NC1HZXWBQ")
@@ -56,3 +114,5 @@ router.get('/transactions', function (req, res, next) {
             res.send(filteredData)
         })
 })
+
+module.exports = router;
