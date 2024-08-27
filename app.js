@@ -13,6 +13,7 @@ var kronRouter = require('./routes/kron');
 var pingRouter = require('./routes/ping');
 var firiRouter = require('./routes/firi')
 var newswebRouter = require('./routes/newsweb')
+var barebitcoinRouter = require('./routes/barebitcoin')
 
 var app = express();
 
@@ -34,6 +35,7 @@ app.use('/kron', kronRouter);
 app.use('/ping', pingRouter);
 app.use('/firi', firiRouter);
 app.use('/newsweb', newswebRouter);
+app.use('/barebitcoin', barebitcoinRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
