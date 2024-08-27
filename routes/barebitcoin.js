@@ -57,6 +57,7 @@ router.get('/price', function (req, res, next) {
 
 router.post('/balance', function (req, res, next) {
     const { accessKey, accountKey } = req.body
+    console.log(accessKey, accountKey)
     fetch('https://api.bb.no/export/balance', {
         headers: {
             'Content-Type': 'application/json',
@@ -67,6 +68,7 @@ router.post('/balance', function (req, res, next) {
         .then(response => {
             getPrice(true)
                 .then(price => {
+                    console.log(response.bitcoinAccounts)
                     res.send(response.bitcoinAccounts.filter(res => res.name === "Hovedkonto").map(account => {
                         return {
                             name: "BTC",
@@ -84,6 +86,7 @@ router.post('/balance', function (req, res, next) {
 
 router.post('/transactions', function (req, res, next) {
     const { accessKey } = req.body
+    console.log(accessKey)
     fetch('https://api.bb.no/export/transactions', {
         headers: {
             'Content-Type': 'application/json',
