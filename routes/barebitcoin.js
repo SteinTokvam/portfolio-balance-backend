@@ -39,6 +39,17 @@ function setFeeAmount(item) {
     return item.feeAmount !== '' ? parseFloat(item.feeAmount) : 0
 }
 
+function setCost(item) {
+    if (item.type === "BTC_WITHDRAWAL") {
+        return parseFloat(parseFloat(item.outAmount * item.rateMarket).toFixed(2))
+    } else if(item.type === "BTC_DEPOSIT") {
+        return parseFloat(parseFloat(item.inAmount * item.rateMarket).toFixed(2))
+    } else if(item.type === "BTC_BUY") {
+        return parseFloat(parseFloat(item.outAmount).toFixed(2))
+    }
+    return parseFloat(item.inAmount)
+}
+
 function getPrice(onlyPrice) {
     return fetch('https://barebitcoin.no/connect/bb.v1alpha.BBService/Price', {
         method: 'POST',
@@ -57,7 +68,9 @@ router.get('/price', function (req, res, next) {
 
 router.post('/balance', function (req, res, next) {
     const { accessKey, accountKey } = req.body
-    console.log(accessKey, accountKey)
+    if(accessKey === undefined) {
+        return next(createError(400, 'Missing required fields accessKey or accountKey'))
+    }
     fetch('https://api.bb.no/export/balance', {
         headers: {
             'Content-Type': 'application/json',
@@ -68,7 +81,6 @@ router.post('/balance', function (req, res, next) {
         .then(response => {
             getPrice(true)
                 .then(price => {
-                    console.log(response.bitcoinAccounts)
                     res.send(response.bitcoinAccounts.filter(res => res.name === "Hovedkonto").map(account => {
                         return {
                             name: "BTC",
@@ -86,7 +98,9 @@ router.post('/balance', function (req, res, next) {
 
 router.post('/transactions', function (req, res, next) {
     const { accessKey } = req.body
-    console.log(accessKey)
+    if(accessKey === undefined) {
+        return next(createError(400, 'Missing required fields accessKey'))
+    }
     fetch('https://api.bb.no/export/transactions', {
         headers: {
             'Content-Type': 'application/json',
@@ -95,7 +109,6 @@ router.post('/transactions', function (req, res, next) {
     })
         .then(response => response.json())
         .then(response => {
-            console.log(response)
             const filteredData = response
                 .filter(item => item.inCurrency !== "NOK")
                 .filter(item => item.accountId !== "acc_01J631DK3N56K40P6NC1HZXWBQ")
@@ -103,7 +116,7 @@ router.post('/transactions', function (req, res, next) {
                     return {
                         //bb_type: 'trade',
                         transactionKey: item.id,
-                        cost: item.outAmount !== '' ? parseFloat(item.outAmount) : parseFloat(item.inAmount),
+                        cost: setCost(item),
                         name: item.type === "BTC_WITHDRAWAL" ? item.outCurrency : item.inCurrency,
                         type: setType(item.type),
                         date: item.createTime,
