@@ -29,6 +29,8 @@ function setEquityShare(item) {
         return parseFloat(item.outAmount)
     } else if (item.type === "BTC_DEPOSIT") {
         return parseFloat(item.inAmount)
+    } else if (item.type === "BTC_BONUS") {
+        return parseFloat(item.inAmount)
     }
 }
 
@@ -46,6 +48,8 @@ function setCost(item) {
         return parseFloat(parseFloat(item.inAmount * item.rateMarket).toFixed(2))
     } else if(item.type === "BTC_BUY") {
         return parseFloat(parseFloat(item.outAmount).toFixed(2))
+    } else if (item.type === "BTC_BONUS") {
+        return parseFloat((parseFloat(item.rateMarket) * parseFloat(item.inAmount)).toFixed(2))
     }
     return parseFloat(item.inAmount)
 }
