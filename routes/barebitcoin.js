@@ -1,4 +1,5 @@
 var express = require('express');
+const res = require('express/lib/response');
 var createError = require('http-errors');
 var router = express.Router();
 
@@ -74,7 +75,10 @@ function getTransactions(accessKey) {
     })
         .then(response => response.json())
         .then(response => {
-            console.log(response)
+            if(response.error) {
+                res.status(500).send(response)
+                return
+            }
             return response
                 .filter(item => item.inCurrency !== "NOK")
                 .filter(item => item.accountId !== "acc_01J631DK3N56K40P6NC1HZXWBQ")
@@ -144,7 +148,7 @@ router.post('/transactions', function (req, res, next) {
     if (accessKey === undefined) {
         return next(createError(400, 'Missing required fields accessKey'))
     }
-    getTransactions()
+    getTransactions(accessKey)
         .then(transactions => {
             res.send(transactions)
         })
