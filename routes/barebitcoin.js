@@ -118,7 +118,6 @@ router.post('/balance', function (req, res, next) {
                     getTransactions(accessKey)
                         .then(transactions => {
                             res.send(response.bitcoinAccounts.filter(res => res.name === "Hovedkonto").map(account => {
-                                console.log(account.balanceBitcoin * price)
                                 return {
                                     name: "BTC",
                                     accountKey: accountKey,
