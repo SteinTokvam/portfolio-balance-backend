@@ -74,6 +74,7 @@ function getTransactions(accessKey) {
     })
         .then(response => response.json())
         .then(response => {
+            console.log(response)
             return response
                 .filter(item => item.inCurrency !== "NOK")
                 .filter(item => item.accountId !== "acc_01J631DK3N56K40P6NC1HZXWBQ")
