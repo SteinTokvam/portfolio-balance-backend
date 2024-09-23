@@ -124,8 +124,8 @@ router.post('/balance', function (req, res, next) {
                 .then(price => {
                     getTransactions(accessKey)
                         .then(transactions => {
-                            const currentValue = price * parseFloat(account.balanceBitcoin)
                             res.send(response.bitcoinAccounts.filter(res => res.name === "Hovedkonto").map(account => {
+                                const currentValue = price * parseFloat(account.balanceBitcoin)
                                 return {
                                     name: "BTC",
                                     accountKey: accountKey,
