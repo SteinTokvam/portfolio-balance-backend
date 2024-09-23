@@ -122,20 +122,16 @@ router.post('/balance', function (req, res, next) {
                 .then(price => {
                     getTransactions(accessKey)
                         .then(transactions => {
+                            const currentValue = price * parseFloat(account.balanceBitcoin)
                             res.send(response.bitcoinAccounts.filter(res => res.name === "Hovedkonto").map(account => {
                                 return {
                                     name: "BTC",
                                     accountKey: accountKey,
                                     equityShare: parseFloat(account.balanceBitcoin),
                                     equityType: "Cryptocurrency",
-                                    value: price * parseFloat(account.balanceBitcoin),
+                                    value: currentValue,
                                     goalPercentage: 0,
-                                    yield: (price * parseFloat(account.balanceBitcoin)) - transactions.reduce((a, b) => {
-                                        if (b.type === "WITHDRAWAL") {
-                                            return a - (b.cost - b.fee)
-                                        }
-                                        return a + b.cost
-                                    }, 0),
+                                    yield: currentValue - transactions.reduce((a, b) => b.type === "WITHDRAWAL" ? a - b.cost : a + b.cost, 0),
                                 }
                             }))
                         })
