@@ -137,7 +137,7 @@ router.post('/balance', function (req, res, next) {
                                         if (b.type === "SELL" || b.type === "WITHDRAWAL") {
                                             return a - b.cost
                                         } else if (b.type === "YIELD") {
-
+                                            return a
                                         } else {
                                             return a + b.cost
                                         }
