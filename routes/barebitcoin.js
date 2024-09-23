@@ -13,6 +13,8 @@ function setType(type) {
             return "WITHDRAWAL";
         case "BTC_BUY":
             return "BUY";
+        case "BTC_BONUS":
+            return "YIELD";
         case "BTC_SELL":
             return "SELL";
         default:
@@ -75,7 +77,7 @@ function getTransactions(accessKey) {
     })
         .then(response => response.json())
         .then(response => {
-            if(response.error) {
+            if (response.error) {
                 res.status(500).send(response)
                 return
             }
@@ -131,7 +133,15 @@ router.post('/balance', function (req, res, next) {
                                     equityType: "Cryptocurrency",
                                     value: currentValue,
                                     goalPercentage: 0,
-                                    yield: currentValue - transactions.reduce((a, b) => b.type === "WITHDRAWAL" ? a - b.cost : a + b.cost, 0),
+                                    yield: currentValue - transactions.reduce((a, b) => {
+                                        if (b.type === "SELL" || b.type === "WITHDRAWAL") {
+                                            return a - b.cost
+                                        } else if (b.type === "YIELD") {
+
+                                        } else {
+                                            return a + b.cost
+                                        }
+                                    }, 0),
                                 }
                             }))
                         })
