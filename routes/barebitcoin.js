@@ -131,8 +131,8 @@ router.post('/balance', function (req, res, next) {
                                     value: price * parseFloat(account.balanceBitcoin),
                                     goalPercentage: 0,
                                     yield: (price * parseFloat(account.balanceBitcoin)) - transactions.reduce((a, b) => {
-                                        if (b.type === "WITHDRAWAL" || b.type === "DEPOSIT") {
-                                            return a 
+                                        if (b.type === "WITHDRAWAL") {
+                                            return a - (b.cost - b.fee)
                                         }
                                         return a + b.cost
                                     }, 0),
