@@ -134,12 +134,12 @@ router.post('/balance', function (req, res, next) {
                                     value: currentValue,
                                     goalPercentage: 0,
                                     yield: currentValue - transactions.reduce((a, b) => {
-                                        if (b.type === "SELL" || b.type === "WITHDRAWAL") {
+                                        if (b.type === "SELL") {
                                             return a - b.cost
-                                        } else if (b.type === "YIELD") {
-                                            return a
-                                        } else {
+                                        } else if (b.type === "BUY") {
                                             return a + b.cost
+                                        } else {
+                                            return a
                                         }
                                     }, 0),
                                 }
