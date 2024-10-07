@@ -68,7 +68,7 @@ function getPrice(onlyPrice) {
         .then(response => onlyPrice ? response.midBtcnok : response)
 }
 
-function getTransactions(accessKey) {
+function getTransactions(accessKey, accountKey) {
     return fetch('https://api.bb.no/export/transactions', {
         headers: {
             'Content-Type': 'application/json',
@@ -88,6 +88,7 @@ function getTransactions(accessKey) {
                     return {
                         //bb_type: 'trade',
                         transactionKey: item.id,
+                        accountKey,
                         cost: setCost(item),
                         name: item.type === "BTC_WITHDRAWAL" ? item.outCurrency : item.inCurrency,
                         type: setType(item.type),
@@ -122,7 +123,7 @@ router.post('/balance', function (req, res, next) {
         .then(response => {
             getPrice(true)
                 .then(price => {
-                    getTransactions(accessKey)
+                    getTransactions(accessKey, accountKey)
                         .then(transactions => {
                             res.send(response.bitcoinAccounts.filter(res => res.name === "Hovedkonto").map(account => {
                                 const currentValue = price * parseFloat(account.balanceBitcoin)
@@ -150,11 +151,11 @@ router.post('/balance', function (req, res, next) {
 })
 
 router.post('/transactions', function (req, res, next) {
-    const { accessKey } = req.body
+    const { accessKey, accountKey } = req.body
     if (accessKey === undefined) {
         return next(createError(400, 'Missing required fields accessKey'))
     }
-    getTransactions(accessKey)
+    getTransactions(accessKey, accountKey)
         .then(transactions => {
             res.send(transactions)
         })
