@@ -67,7 +67,7 @@ router.post('/holdings', async function (req, res, next) {
                     name: "Kontanter",
                     accountKey: accountKey,
                     equityShare: 1,
-                    equityType: "Kontanter",
+                    equityType: "Fund",
                     value: totalValue - holdings.reduce((a, b) => a + b.value, 0),
                     goalPercentage: 0,
                     yield: 0,
