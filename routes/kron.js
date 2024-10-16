@@ -44,7 +44,7 @@ router.post('/transactions', function (req, res, next) {
 
 router.post('/holdings', async function (req, res, next) {
     const { accessKey, accountKey, account_id } = req.body
-    const totalValue = (await getDevelopment(accessKey, account_id, "1W")).data.series.slice(-1)[0].market_value.value
+    const totalValue = (await getDevelopment(accessKey, account_id, "1W")).data.series.pop().market_value.value
     
     fetch(`https://kron.no/api/accounts/${account_id}/position-performances`, getOptions(accessKey))
         .then(response => response.json())
