@@ -12,6 +12,11 @@ function getOptions(api_key) {
     }
 }
 
+function getDevelopment(accessKey, account_id, interval) {
+    return fetch(`https://kron.no/api/v4/accounts/${account_id}/development?interval=${interval}`, getOptions(accessKey))
+        .then(response => response.json())
+}
+
 
 router.post('/transactions', function (req, res, next) {
     const { accessKey, accountKey, account_id } = req.body
@@ -37,22 +42,40 @@ router.post('/transactions', function (req, res, next) {
         })
 });
 
-router.post('/holdings', function (req, res, next) {
+router.post('/holdings', async function (req, res, next) {
     const { accessKey, accountKey, account_id } = req.body
+    const totalValue = (await getDevelopment(accessKey, account_id, "1W")).data.series.slice(-1)[0].market_value.value
+    
     fetch(`https://kron.no/api/accounts/${account_id}/position-performances`, getOptions(accessKey))
         .then(response => response.json())
-        .then(response => res.send(response.map(res => {
-            return {
-                name: res.security_name,
-                accountKey: accountKey,
-                equityShare: res.units,
-                equityType: "Fund",
-                value: res.market_value,
-                goalPercentage: 0,
-                yield: res.profit,
-                isin: res.isin,
+        .then(response => {
+            const holdings = response.map(res => {
+                return {
+                    name: res.security_name,
+                    accountKey: accountKey,
+                    equityShare: res.units,
+                    equityType: "Fund",
+                    value: res.market_value,
+                    goalPercentage: 0,
+                    yield: res.profit,
+                    isin: res.isin,
+                }
+            })
+
+            if(holdings.reduce((a, b) => a + b.value, 0) < totalValue) {
+                holdings.push({
+                    name: "Kontanter",
+                    accountKey: accountKey,
+                    equityShare: 1,
+                    equityType: "Kontanter",
+                    value: totalValue - holdings.reduce((a, b) => a + b.value, 0),
+                    goalPercentage: 0,
+                    yield: 0,
+                    isin: "",
+                })
             }
-        })))
+            res.send(holdings)
+        })
         .catch(error => {
             console.log(error)
             next(createError(500, error))
@@ -62,16 +85,17 @@ router.post('/holdings', function (req, res, next) {
 router.post('/development', function (req, res, next) {
     const { accessKey, account_id, interval } = req.body
 
-    fetch(`https://kron.no/api/v4/accounts/${account_id}/development?interval=${interval}`, getOptions(accessKey))
-        .then(response => response.json())
-        .then(response => res.send(response.data.series.map(res => {
-            return {
-                yield_percentage: res.yield.value,
-                date: res.date,
-                yield_in_currency: res.return.value,
-                market_value: res.market_value.value
-            }
-        })))
+    getDevelopment(accessKey, account_id, interval)
+        .then(response => {
+            res.send(response.data.series.map(res => {
+                return {
+                    yield_percentage: res.yield.value,
+                    date: res.date,
+                    yield_in_currency: res.return.value,
+                    market_value: res.market_value.value
+                }
+            }))
+        })
 });
 
 module.exports = router;
