@@ -44,8 +44,15 @@ router.post('/transactions', function (req, res, next) {
 
 router.post('/total_value', async function (req, res, next) {
     const { accessKey, account_id } = req.body
-    getDevelopment(accessKey, account_id, "1W")
-    .then(response => res.send({value: parseFloat(response.data.series.pop().market_value.value.toFixed(2))}))
+    getDevelopment(accessKey, account_id, "year-to-date")
+    .then(response => {
+        const kronValue = response.data.series.pop()
+        res.send({
+        value: parseFloat(kronValue.market_value.value.toFixed(2)),
+        yield: parseFloat(kronValue.return.value.toFixed(2))
+    })
+}
+)
 });
 
 router.post('/holdings', async function (req, res, next) {
