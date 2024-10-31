@@ -66,10 +66,24 @@ router.post("/balance", function (req, res, next) {
 });
 
 router.post("/price", function (req, res, next) {
-    const { symbol, timeframe, since, limit } = req.body;
-    const exchange = new binance();
-    exchange.fetch_ohlcv(symbol, timeframe, since, limit)
-      .then((ticker) => res.send(ticker));
-  });
+  const { symbol, timeframe, since, limit } = req.body;
+  const exchange = new binance();
+  exchange.fetch_ohlcv(symbol, timeframe, since, limit).then((ticker) =>
+    res.send(
+      ticker.map((ticker) => {
+        return {
+          symbol,
+          data: {
+            date: new Date(ticker[0]),
+            open: ticker[1],
+            high: ticker[2],
+            low: ticker[3],
+            close: ticker[4],
+          },
+        };
+      })
+    )
+  );
+});
 
 module.exports = router;
