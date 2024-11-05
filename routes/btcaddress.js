@@ -1,5 +1,3 @@
-const { binance } = require("ccxt");
-const { default: ccxt } = require("ccxt");
 var express = require("express");
 const res = require("express/lib/response");
 var createError = require("http-errors");
