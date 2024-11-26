@@ -93,7 +93,7 @@ function getTransactions(accessKey, accountKey) {
                         name: item.type === "BTC_WITHDRAWAL" ? item.outCurrency : item.inCurrency,
                         type: setType(item.type),
                         date: item.createTime,
-                        equityPrice: item.rateMarket,
+                        equityPrice: parseFloat(item.rateMarket),
                         e24Key: "",
                         equityShare: setEquityShare(item),
                         equityType: "Cryptocurrency",
