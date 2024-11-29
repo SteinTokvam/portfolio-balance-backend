@@ -42,7 +42,7 @@ router.post('/transactions', function (req, res, next) {
                         {
                             transactionKey: `${item.id}_principal`,
                             accountKey,
-                            cost: item.principal,
+                            cost: -item.principal,
                             name: `${item.borrowerName} - (${item.loanId})`,
                             type: "SELL",
                             date: item.transactionDate,
