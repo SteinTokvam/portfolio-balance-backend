@@ -61,7 +61,7 @@ router.post('/transactions', function (req, res, next) {
                             accountKey,
                             cost: item.netInterest,
                             name: `${item.borrowerName} - (${item.loanId})`,
-                            type: "INTEREST",
+                            type: "YIELD",
                             date: item.transactionDate,
                             equityPrice: 1,
                             e24Key: "",
