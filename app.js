@@ -15,6 +15,7 @@ var firiRouter = require('./routes/firi')
 var newswebRouter = require('./routes/newsweb')
 var barebitcoinRouter = require('./routes/barebitcoin')
 var walletRouter = require('./routes/btcaddress')
+var fundingpartnerRouter = require('./routes/fundingpartner')
 
 var app = express();
 
@@ -38,6 +39,7 @@ app.use('/firi', firiRouter);
 app.use('/newsweb', newswebRouter);
 app.use('/barebitcoin', barebitcoinRouter)
 app.use('/btcwallet', walletRouter)
+app.use('/fundingpartner', fundingpartnerRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
