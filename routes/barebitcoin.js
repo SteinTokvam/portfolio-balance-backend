@@ -133,6 +133,12 @@ router.post("/balance", function (req, res, next) {
               .filter((res) => res.name === "Hovedkonto")
               .map((account) => {
                 const currentValue = price * parseFloat(account.balanceBitcoin);
+                const filteredTransactions = transactions.filter((transaction) => transaction.type === "BUY" || transaction.type === "SELL")
+                const holdingBTCValueNok = filteredTransactions.reduce((a, b) => b.type === "SELL" ? a - b.equityShare : a + b.equityShare, 0)*price
+                const yield = holdingBTCValueNok - filteredTransactions.reduce((a, b) => b.type === "SELL" ? a - b.cost : a + b.cost, 0) + (transactions.filter((transaction) => transaction.type === 'YIELD').reduce((a, b) => a + b.equityShare, 0)*price)
+
+                console.log(transactions)
+
                 return {
                   name: "BTC",
                   accountKey: accountKey,
@@ -140,17 +146,7 @@ router.post("/balance", function (req, res, next) {
                   equityType: "Cryptocurrency",
                   value: currentValue,
                   goalPercentage: 0,
-                  yield:
-                    currentValue -
-                    transactions.reduce((a, b) => {
-                      if (b.type === "SELL") {
-                        return a - b.cost;
-                      } else if (b.type === "BUY") {
-                        return a + b.cost;
-                      } else {
-                        return a;
-                      }
-                    }, 0),
+                  yield,
                 };
               })
           );
