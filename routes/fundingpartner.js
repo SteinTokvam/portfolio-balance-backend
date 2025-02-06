@@ -5,7 +5,7 @@ var router = express.Router();
 
 async function getTransactions(accountKey, token) {
   return fetch(
-    "https://fundingpartner.no/api/v2/transactions-unified?startDate=2018-01-01&endDate=2024-11-29&lastILTID=&lastIFTID=",
+    `https://fundingpartner.no/api/v2/transactions-unified?startDate=2018-01-01&endDate=${new Date().toISOString().split('T')[0]}&lastILTID=&lastIFTID=`,
     {
       headers: {
         "Content-Type": "application/json",
