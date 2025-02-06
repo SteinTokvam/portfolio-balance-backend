@@ -43,8 +43,8 @@ router.post('/transactions', function (req, res, next) {
 });
 
 router.post('/total_value', async function (req, res, next) {
-    const { accessKey, account_id } = req.body
-    getDevelopment(accessKey, account_id, "year-to-date")
+    const { accessKey, account_id, interval } = req.body
+    getDevelopment(accessKey, account_id, interval)
     .then(response => {
         const kronValue = response.data.series.pop()
         res.send({
