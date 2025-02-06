@@ -137,8 +137,6 @@ router.post("/balance", function (req, res, next) {
                 const holdingBTCValueNok = filteredTransactions.reduce((a, b) => b.type === "SELL" ? a - b.equityShare : a + b.equityShare, 0)*price
                 const yield = holdingBTCValueNok - filteredTransactions.reduce((a, b) => b.type === "SELL" ? a - b.cost : a + b.cost, 0) + (transactions.filter((transaction) => transaction.type === 'YIELD').reduce((a, b) => a + b.equityShare, 0)*price)
 
-                console.log(transactions)
-
                 return {
                   name: "BTC",
                   accountKey: accountKey,
@@ -181,7 +179,6 @@ router.post("/yield", function (req, res, next) {
   )
     .then((response) => response.json())
     .then((response) => {
-      console.log(response);
       res.send({yield: response.allTime[response.allTime.length - 1].pnlAbsolute});
     });
 });
