@@ -69,6 +69,17 @@ function getPrice(onlyPrice) {
     .then((response) => (onlyPrice ? response.midBtcnok : response));
 }
 
+function getPnl(accessKey) {
+  return fetch("https://barebitcoin.no/connect/bb.pnl.v1.PnlService/LatestPNL?connect=v1&encoding=json&message=%7B%7D", {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessKey}`,
+    },
+  })
+    .then((response) => response.json())
+    .then((response) => response.pnlAllAccounts.filter((item) => item.account));
+}
+
 function getTransactions(accessKey, accountKey) {
   return fetch("https://api.bb.no/export/transactions", {
     headers: {
@@ -84,17 +95,17 @@ function getTransactions(accessKey, accountKey) {
       }
       return response
         .filter((item) => item.inCurrency !== "NOK")
-        .filter((item) => item.accountId !== "acc_01J631DK3N56K40P6NC1HZXWBQ")
         .map((item) => {
+          const accountName = item.accountId === "acc_01J631DK3N56K40P6NC1HZXWBQ" ? "Barn" : "Hovedkonto";
+          const limit = item.subType ? ` - ${item.subType}` : "";
           return {
-            //bb_type: 'trade',
             transactionKey: item.id,
             accountKey,
             cost: setCost(item),
             name:
               item.type === "BTC_WITHDRAWAL"
-                ? item.outCurrency
-                : item.inCurrency,
+                ? `${accountName} - (${item.outCurrency}${limit})`
+                : `${accountName} - (${item.inCurrency}${limit})`,
             type: setType(item.type),
             date: item.createTime,
             equityPrice: parseFloat(item.rateMarket),
@@ -126,19 +137,15 @@ router.post("/balance", function (req, res, next) {
   })
     .then((response) => response.json())
     .then((response) => {
+      console.log(response);
       getPrice(true).then((price) => {
-        getTransactions(accessKey, accountKey).then((transactions) => {
-          res.send(
-            response.bitcoinAccounts
-              .filter((res) => res.name === "Hovedkonto")
+        getPnl(accessKey).then((pnl) => {
+          const holdings = response.bitcoinAccounts
               .map((account) => {
                 const currentValue = price * parseFloat(account.balanceBitcoin);
-                const filteredTransactions = transactions.filter((transaction) => transaction.type === "BUY" || transaction.type === "SELL")
-                const holdingBTCValueNok = filteredTransactions.reduce((a, b) => b.type === "SELL" ? a - b.equityShare : a + b.equityShare, 0)*price
-                const yield = holdingBTCValueNok - filteredTransactions.reduce((a, b) => b.type === "SELL" ? a - b.cost : a + b.cost, 0) + (transactions.filter((transaction) => transaction.type === 'YIELD').reduce((a, b) => a + b.equityShare, 0)*price)
-
+                const yield = parseInt(pnl.filter(item => item.account === account.id)[0].holdings.pnlAbsolute)
                 return {
-                  name: "BTC",
+                  name: `${account.name} - (BTC)`,
                   accountKey: accountKey,
                   equityShare: parseFloat(account.balanceBitcoin),
                   equityType: "Cryptocurrency",
@@ -147,7 +154,16 @@ router.post("/balance", function (req, res, next) {
                   yield,
                 };
               })
-          );
+              holdings.push({
+                name: `Kontanter - (NOK)`,
+                  accountKey: accountKey,
+                  equityShare: 1,
+                  equityType: "Cryptocurrency",
+                  value: parseInt(response.balanceNok),
+                  goalPercentage: 0,
+                  yield: 0,
+              })
+          res.send(holdings);
         });
       });
     });
