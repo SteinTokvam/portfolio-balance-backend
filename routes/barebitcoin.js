@@ -137,7 +137,6 @@ router.post("/balance", function (req, res, next) {
   })
     .then((response) => response.json())
     .then((response) => {
-      console.log(response);
       getPrice(true).then((price) => {
         getPnl(accessKey).then((pnl) => {
           const holdings = response.bitcoinAccounts
